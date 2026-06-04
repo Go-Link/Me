@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>GoLink | Creative Studio</title>
+    
+    <!-- خطوط جوجل الاحترافية لدعم جميع اللغات بسلاسة -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- مكتبة الأيقونات FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-color: #0f172a; 
+            --card-bg: rgba(30, 41, 59, 0.70); 
+            --accent-gold: #fbbf24; 
+            --accent-blue: #38bdf8; 
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --font-ar: 'Cairo', sans-serif;
+            --font-en: 'Poppins', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: var(--font-en);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* === 1. كانفاس نقاط Google Stitch التفاعلية === */
+        #stitchCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2; 
+            pointer-events: auto;
+        }
+
+        /* === 2. الخلفية اللانهائية وتأثير التضخيم عند الأطراف === */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            pointer-events: none;
+            opacity: 0.04;
+            transform: rotate(-12deg) scale(1.1);
+            mask-image: radial-gradient(circle, rgba(0,0,0,0.6) 20%, rgba(0,0,0,1) 100%);
+            -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,0.6) 20%, rgba(0,0,0,1) 100%);
+        }
+
+        .marquee-row {
+            display: flex;
+            width: 200%;
+            white-space: nowrap;
+        }
+
+        .marquee-content {
+            display: flex;
+            gap: 90px;
+            padding-right: 90px;
+            font-size: 38px;
+        }
+
+        .marquee-content i {
+            display: inline-block;
+            animation: edgeSwell 10s ease-in-out infinite alternate;
+        }
+
+        .move-left .marquee-content { animation: scrollLeft 35s linear infinite; }
+        .move-right .marquee-content { animation: scrollRight 35s linear infinite; }
+
+        @keyframes scrollLeft { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
+        @keyframes scrollRight { 0% { transform: translateX(-50%); } 100% { transform: translateX(0%); } }
+        
+        @keyframes edgeSwell {
+            0% { transform: scale(0.95); }
+            100% { transform: scale(1.35); filter: drop-shadow(0 0 8px rgba(255,255,255,0.5)); }
+        }
+
+        /* نظام التوهج المزدوج المتعاكس */
+        .stitch-glow-bottom-left {
+            position: fixed;
+            bottom: -15%;
+            left: -10%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(circle, rgba(108, 92, 231, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: 1;
+            pointer-events: none;
+            filter: blur(60px);
+        }
+
+        .stitch-glow-top-right {
+            position: fixed;
+            top: -15%;
+            right: -10%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: 1;
+            pointer-events: none;
+            filter: blur(60px);
+        }
+
+        /* === 3. الهيكل الزجاجي الرئيسي === */
+        .wrap {
+            position: relative;
+            z-index: 5; 
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            padding: 35px 28px;
+            margin: 15px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.55);
+        }
+
+        .profile-container {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 18px;
+        }
+
+        .profile-pic {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-blue);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+        }
+
+        .status-dot {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 16px;
+            height: 16px;
+            background-color: #10b981;
+            border: 3px solid #1e293b;
+            border-radius: 50%;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 6px;
+            background: linear-gradient(to right, var(--text-main), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            font-size: 14px;
+            color: var(--accent-gold);
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .description {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 22px;
+        }
+
+        /* === 4. محدد اللغات === */
+        .lang-switch {
+            display: flex;
+            justify-content: center;
+            gap: 6px; 
+            margin-bottom: 25px;
+            flex-wrap: nowrap; 
+            width: 100%;
+        }
+
+        .lang-btn {
+            background: rgba(4, 44, 85, 0.95); 
+            border: 1px solid rgba(2, 21, 39, 0.95); 
+            width: 46px;  
+            height: 46px; 
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            border-radius: 8px; 
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            opacity: 0.5; 
+            flex-shrink: 0; 
+        }
+
+        /* تطبيق تأثير اللون الداكن فوق الأعلام بنسبة 30% (Brightness 70%) */
+        .lang-btn img {
+            width: 22px; 
+            height: auto;
+            object-fit: contain;
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            filter: brightness(0.7); 
+        }
+
+        .lang-btn .lang-code {
+            font-size: 8.5px; 
+            font-weight: 800;
+            color: #1e3a8a; 
+            font-family: 'Poppins', sans-serif;
+            line-height: 1;
+        }
+
+        /* عند تفعيل الزر أو تمرير الماوس يزول التأثير الداكن ويعود العلم لسطوعه الكامل */
+        .lang-btn:hover, .lang-btn.active {
+            opacity: 1;
+            background: #95b9f0;
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+
+        .lang-btn:hover img, .lang-btn.active img {
+            filter: brightness(1);
+        }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .link {
+            display: flex;
+            align-items: center;
+            padding: 12px 18px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13.5px;
+        }
+
+        .link .icon {
+            font-size: 18px;
+            width: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .link .label {
+            flex: 1;
+            text-align: center;
+        }
+
+        .link .arrow {
+            font-size: 11px;
+            opacity: 0.5;
+        }
+
+        .link:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-blue);
+            box-shadow: 0 6px 15px rgba(56, 189, 248, 0.15);
+        }
+
+        .link.whatsapp:hover { border-color: #25D366; color: #25D366; box-shadow: 0 6px 15px rgba(37, 211, 102, 0.2); }
+        .link.github:hover { border-color: #ffffff; color: #ffffff; box-shadow: 0 6px 15px rgba(255, 255, 255, 0.2); }
+        .link.linkedin:hover { border-color: #0077B5; color: #0077B5; box-shadow: 0 6px 15px rgba(0, 119, 181, 0.2); }
+
+        .social-icons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .social-icons a {
+            color: var(--text-muted);
+            font-size: 20px;
+            text-decoration: none;
+        }
+
+        .social-icons a:hover {
+            color: var(--accent-gold);
+            transform: scale(1.2);
+        }
+
+        footer {
+            margin-top: 28px;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: var(--font-en);
+            letter-spacing: 0.5px;
+        }
+
+        .footer-link {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 700;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 1.5px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--accent-gold);
+            transform-origin: bottom right;
+            transition: transform 0.25s ease-out;
+        }
+
+        .footer-link:hover {
+            color: var(--accent-gold);
+        }
+
+        .footer-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+        body.ltr { font-family: var(--font-en); }
+        body.rtl { font-family: var(--font-ar); }
+        body.ltr .link { flex-direction: row; }
+        body.rtl .link { flex-direction: row-reverse; }
+        body.ltr .link .arrow { transform: rotate(180deg); }
+
+        /* ====================================================
+           📱 استعلامات الميديا للهواتف فقط (Mobile Optimization)
+           ==================================================== */
+        @media (max-width: 480px) {
+            .wrap {
+                padding: 25px 18px; 
+                margin: 12px;
+                max-width: 92%;
+                border-radius: 20px;
+            }
+
+            .profile-container {
+                width: 95px;
+                height: 95px;
+                margin-bottom: 12px;
+            }
+
+            h1 { font-size: 20px; }
+            .tagline { font-size: 12.5px; margin-bottom: 8px; }
+            .description { font-size: 11.5px; margin-bottom: 16px; line-height: 1.4; }
+
+            .lang-switch {
+                gap: 4px; 
+                margin-bottom: 20px;
+            }
+
+            .lang-btn {
+                width: 39px;
+                height: 39px;
+                border-radius: 6px;
+                gap: 1px;
+            }
+
+            .lang-btn img {
+                width: 18px;
+            }
+
+            .lang-btn .lang-code {
+                font-size: 7.5px;
+            }
+
+            .links { gap: 10px; }
+            .link { padding: 10px 14px; border-radius: 11px; font-size: 12px; }
+            .link .icon { font-size: 16px; width: 24px; }
+            .social-icons { margin-top: 20px; gap: 15px; }
+            .social-icons a { font-size: 18px; }
+            footer { margin-top: 22px; font-size: 10px; }
+        }
+    </style>
+</head>
+<body class="ltr">
+
+    <div class="stitch-glow-bottom-left"></div>
+    <div class="stitch-glow-top-right"></div>
+
+    <canvas id="stitchCanvas"></canvas>
+
+    <div class="animated-bg">
+        <div class="marquee-row move-left">
+            <div class="marquee-content">
+                <i class="fas fa-qrcode"></i>
+                <i class="fas fa-bullhorn"></i>
+                <i class="fas fa-code"></i>
+                <i class="fas fa-print"></i>
+                <i class="fas fa-palette"></i>
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="marquee-content">
+                <i class="fas fa-qrcode"></i>
+                <i class="fas fa-bullhorn"></i>
+                <i class="fas fa-code"></i>
+                <i class="fas fa-print"></i>
+                <i class="fas fa-palette"></i>
+                <i class="fas fa-scroll"></i>
+            </div>
+        </div>
+        <div class="marquee-row move-right">
+            <div class="marquee-content">
+                <i class="fas fa-globe"></i>
+                <i class="fas fa-lightbulb"></i>
+                <i class="fas fa-layer-group"></i>
+                <i class="fas fa-images"></i>
+                <i class="fas fa-wand-magic-sparkles"></i>
+                <i class="fas fa-vector-square"></i>
+            </div>
+            <div class="marquee-content">
+                <i class="fas fa-globe"></i>
+                <i class="fas fa-lightbulb"></i>
+                <i class="fas fa-layer-group"></i>
+                <i class="fas fa-images"></i>
+                <i class="fas fa-wand-magic-sparkles"></i>
+                <i class="fas fa-vector-square"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrap">
+        <div class="lang-switch">
+            <button class="lang-btn active" id="btn-en" onclick="changeLanguage('en')" title="English">
+                <img src="https://flagcdn.com/w40/gb.png" alt="English">
+                <span class="lang-code">EN</span>
+            </button>
+            <button class="lang-btn" id="btn-ar" onclick="changeLanguage('ar')" title="العربية">
+                <img src="https://flagcdn.com/w40/eg.png" alt="العربية">
+                <span class="lang-code">AR</span>
+            </button>
+            <button class="lang-btn" id="btn-ru" onclick="changeLanguage('ru')" title="Русский">
+                <img src="https://flagcdn.com/w40/ru.png" alt="Русский">
+                <span class="lang-code">RU</span>
+            </button>
+            <button class="lang-btn" id="btn-de" onclick="changeLanguage('de')" title="Deutsch">
+                <img src="https://flagcdn.com/w40/de.png" alt="Deutsch">
+                <span class="lang-code">DE</span>
+            </button>
+            <button class="lang-btn" id="btn-es" onclick="changeLanguage('es')" title="Español">
+                <img src="https://flagcdn.com/w40/es.png" alt="Español">
+                <span class="lang-code">ES</span>
+            </button>
+            <button class="lang-btn" id="btn-fr" onclick="changeLanguage('fr')" title="Français">
+                <img src="https://flagcdn.com/w40/fr.png" alt="Français">
+                <span class="lang-code">FR</span>
+            </button>
+            <button class="lang-btn" id="btn-zh" onclick="changeLanguage('zh')" title="中文">
+                <img src="https://flagcdn.com/w40/cn.png" alt="中文">
+                <span class="lang-code">ZH</span>
+            </button>
+        </div>
+
+        <div class="profile-container">
+            <img class="profile-pic" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="GoLink Creative Director" />
+            <div class="status-dot"></div>
+        </div>
+        
+        <div class="info-section">
+            <h1 id="txt-title">Elevate Your Brand</h1>
+            <p class="tagline" id="txt-tagline">Visual Designer & Advertising Expert</p>
+            <p class="description" id="txt-desc">Crafting high-impact brand identities, premium prints, and responsive websites that captivate and convert.</p>
+        </div>
+
+        <nav class="links">
+            <a class="link" href="https://behance.net" target="_blank" rel="noopener noreferrer">
+                <div class="icon"><i class="fa-brands fa-behance"></i></div>
+                <span class="label" id="btn-portfolio">Explore My Portfolio</span>
+                <div class="arrow"><i class="fas fa-chevron-left"></i></div>
+            </a>
+
+            <a class="link github" href="https://github.com" target="_blank" rel="noopener noreferrer">
+                <div class="icon"><i class="fab fa-github"></i></div>
+                <span class="label" id="btn-github">Web Development Projects</span>
+                <div class="arrow"><i class="fas fa-chevron-left"></i></div>
+            </a>
+
+            <a class="link linkedin" href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
+                <div class="icon"><i class="fab fa-linkedin-in"></i></div>
+                <span class="label" id="btn-linkedin">Connect on LinkedIn</span>
+                <div class="arrow"><i class="fas fa-chevron-left"></i></div>
+            </a>
+
+            <a class="link whatsapp" href="https://wa.me/201281358100" target="_blank" rel="noopener noreferrer">
+                <div class="icon"><i class="fab fa-whatsapp"></i></div>
+                <span class="label" id="btn-whatsapp">Let's Build Your Identity</span>
+                <div class="arrow"><i class="fas fa-chevron-left"></i></div>
+            </a>
+        </nav>
+
+        <div class="social-icons">
+            <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://twitter.com" target="_blank"><i class="fab fa-x-twitter"></i></a>
+        </div>
+
+        <footer>
+            <p>© <span id="year"></span> All Rights Reserved | <a class="footer-link" href="https://wa.me/201281358100" target="_blank" rel="noopener noreferrer">GoLink</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('stitchCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let particles = [];
+        const gap = 30; 
+        const mouse = { x: undefined, y: undefined, radius: 110 }; 
+        let globalTime = 0; 
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            createGrid();
+        }
+
+        class Particle {
+            constructor(x, y) {
+                this.homeX = x; 
+                this.homeY = y;
+                this.angleOffset = Math.random() * Math.PI * 2;
+                this.orbitSpeed = 0.02 + Math.random() * 0.02;
+                this.orbitRadius = 1.8; 
+                
+                this.x = x;
+                this.y = y;
+                this.size = 1.0; 
+                this.ease = 0.08; 
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.18)'; 
+                ctx.fill();
+            }
+
+            update() {
+                let currentOrbitX = this.homeX + Math.sin(globalTime * this.orbitSpeed + this.angleOffset) * this.orbitRadius;
+                let currentOrbitY = this.homeY + Math.cos(globalTime * this.orbitSpeed + this.angleOffset) * this.orbitRadius;
+
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < mouse.radius && mouse.x !== undefined) {
+                    let force = Math.sin((1 - (distance / mouse.radius)) * Math.PI / 2);
+                    let angle = Math.atan2(dy, dx);
+                    
+                    let targetX = this.x - Math.cos(angle) * force * 14;
+                    let targetY = this.y - Math.sin(angle) * force * 14;
+
+                    this.x += (targetX - this.x) * 0.05;
+                    this.y += (targetY - this.y) * 0.05;
+                } else {
+                    this.x += (currentOrbitX - this.x) * this.ease;
+                    this.y += (currentOrbitY - this.y) * this.ease;
+                }
+            }
+        }
+
+        function createGrid() {
+            particles = [];
+            for (let x = gap / 2; x < canvas.width; x += gap) {
+                for (let y = gap / 2; y < canvas.height; y += gap) {
+                    particles.push(new Particle(x, y));
+                }
+            }
+        }
+
+        function loop() {
+            globalTime += 1; 
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+            requestAnimationFrame(loop);
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        window.addEventListener('mouseleave', () => {
+            mouse.x = undefined;
+            mouse.y = undefined;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if(e.touches.length > 0) {
+                mouse.x = e.touches[0].clientX;
+                mouse.y = e.touches[0].clientY;
+            }
+        });
+
+        window.addEventListener('touchend', () => {
+            mouse.x = undefined;
+            mouse.y = undefined;
+        });
+
+        window.addEventListener('resize', resize);
+
+        resize();
+        loop();
+
+        const content = {
+            en: {
+                title: "Elevate Your Brand",
+                tagline: "Visual Designer & Advertising Expert",
+                desc: "Crafting high-impact brand identities, premium prints, and responsive websites that captivate and convert.",
+                portfolio: "Explore My Portfolio",
+                github: "Web Development Projects",
+                linkedin: "Connect on LinkedIn",
+                whatsapp: "Let's Build Your Identity",
+                dir: "ltr"
+            },
+            ar: {
+                title: "ارتقِ بهويتك التجارية",
+                tagline: "مصمم جرافيك وخبير دعاية وإعلان",
+                desc: "نبتكر هويات بصرية قوية، مطبوعات فاخرة، ومواقع إلكترونية تفاعلية تأسر الأنظار وتصنع الفارق لنشاطك.",
+                portfolio: "تصفح معرض أعمالي الفنية",
+                github: "مشاريع وتطوير المواقع",
+                linkedin: "حساب الـ LinkedIn الإحترافي",
+                whatsapp: "ابدأ تصميم هويتك التجارية الآن",
+                dir: "rtl"
+            },
+            ru: {
+                title: "Поднимите Ваш Бренд",
+                tagline: "Визуальный Дизайнер и Эксперт по Рекламе",
+                desc: "Создание впечатляющих фирменных стилей, премиальной полиграфии и адаптивных сайтов.",
+                portfolio: "Посмотреть Мое Портфолио",
+                github: "Проекты Веб-Разработки",
+                linkedin: "Профиль на LinkedIn",
+                whatsapp: "Давайте Создадим Ваш Стиль",
+                dir: "ltr"
+            },
+            de: {
+                title: "Bringen Sie Ihre Marke Voran",
+                tagline: "Visual Designer & Werbeexperte",
+                desc: "Konzeption von starken Markenidentitäten, Premium-Drucken und responsiven Websites.",
+                portfolio: "Mein Portfolio Erkunden",
+                github: "Webentwicklungsprojekte",
+                linkedin: "LinkedIn Profil",
+                whatsapp: "Lassen Sie Uns Designen",
+                dir: "ltr"
+            },
+            es: {
+                title: "Eleva Tu Marca Al Máximo",
+                tagline: "Diseñador Visual y Experto en Publicidad",
+                desc: "Creación de identidades corporativas potentes, impresiones premium y diseño web interactivo.",
+                portfolio: "Explorar Mi Portafolio",
+                github: "Proyectos de Desarrollo Web",
+                linkedin: "Conectar en LinkedIn",
+                whatsapp: "Iniciemos Tu Identidad Visual",
+                dir: "ltr"
+            },
+            fr: {
+                title: "Valorisez Votre Image de Marque",
+                tagline: "Designer Visuel & Expert en Publicité",
+                desc: "Création d'identités de marque fortes, d'impressions de qualité supérieure et de sites web réactifs.",
+                portfolio: "Découvrir Mon Portfolio",
+                github: "Projets de Développement Web",
+                linkedin: "Profil LinkedIn",
+                whatsapp: "Créons Votre Identité Visuelle",
+                dir: "ltr"
+            },
+            zh: {
+                title: "提升您的品牌形象",
+                tagline: "视觉设计师 & 广告设计专家",
+                desc: "打造具有高影响力的品牌视觉标识、高端印刷品以及引人入胜的响应式网站设计。",
+                portfolio: "浏览我的设计作品集",
+                github: "前端与网页开发项目",
+                linkedin: "领英专业联络",
+                whatsapp: "现在定制您的品牌形象",
+                dir: "ltr"
+            }
+        };
+
+        function changeLanguage(lang) {
+            const data = content[lang];
+            
+            document.getElementById('txt-title').innerText = data.title;
+            document.getElementById('txt-tagline').innerText = data.tagline;
+            document.getElementById('txt-desc').innerText = data.desc;
+            document.getElementById('btn-portfolio').innerText = data.portfolio;
+            document.getElementById('btn-github').innerText = data.github;
+            document.getElementById('btn-linkedin').innerText = data.linkedin;
+            document.getElementById('btn-whatsapp').innerText = data.whatsapp;
+            
+            document.body.className = data.dir;
+            document.documentElement.setAttribute('dir', data.dir);
+            document.documentElement.setAttribute('lang', lang);
+
+            const allButtons = document.querySelectorAll('.lang-btn');
+            allButtons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${lang}`).classList.add('active');
+
+            const arrows = document.querySelectorAll('.arrow i');
+            arrows.forEach(arrow => {
+                if (data.dir === 'rtl') {
+                    arrow.className = 'fas fa-chevron-left';
+                } else {
+                    arrow.className = 'fas fa-chevron-right';
+                }
+            });
+            
+            createGrid();
+        }
+
+        document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
