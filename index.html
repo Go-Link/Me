@@ -3,15 +3,13 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>GoLink | Creative Studio</title>
+    <title>Anton Magdy | Creative Designer</title>
     <link rel="icon" href="https://ik.imagekit.io/GotoLink/Me/AntonCircle2.ico" type="image/x-icon">
     
-    <!-- خطوط جوجل الاحترافية لدعم جميع اللغات بسلاسة -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
     
-    <!-- مكتبة الأيقونات FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
@@ -225,7 +223,6 @@
             flex-shrink: 0; 
         }
 
-        /* تطبيق تأثير اللون الداكن فوق الأعلام بنسبة 30% (Brightness 70%) */
         .lang-btn img {
             width: 22px; 
             height: auto;
@@ -243,7 +240,6 @@
             line-height: 1;
         }
 
-        /* عند تفعيل الزر أو تمرير الماوس يزول التأثير الداكن ويعود العلم لسطوعه الكامل */
         .lang-btn:hover, .lang-btn.active {
             opacity: 1;
             background: #95b9f0;
@@ -300,8 +296,24 @@
             box-shadow: 0 6px 15px rgba(56, 189, 248, 0.15);
         }
 
+        /* تنسيق زر Save Contact المميز */
+        .link.save-contact {
+            background: linear-gradient(135deg, #2563eb, var(--accent-blue));
+            color: #fff;
+            border: none;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+        
+        .link.save-contact:hover {
+            background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5);
+            border: none;
+            color: #fff;
+        }
+
+        .link.email:hover { border-color: #ea4335; color: #ea4335; box-shadow: 0 6px 15px rgba(234, 67, 53, 0.2); }
+        .link.instapay:hover { border-color: #6c5ce7; color: #6c5ce7; box-shadow: 0 6px 15px rgba(108, 92, 231, 0.2); }
         .link.whatsapp:hover { border-color: #25D366; color: #25D366; box-shadow: 0 6px 15px rgba(37, 211, 102, 0.2); }
-        .link.github:hover { border-color: #ffffff; color: #ffffff; box-shadow: 0 6px 15px rgba(255, 255, 255, 0.2); }
         .link.linkedin:hover { border-color: #0077B5; color: #0077B5; box-shadow: 0 6px 15px rgba(0, 119, 181, 0.2); }
 
         .social-icons {
@@ -399,14 +411,8 @@
                 gap: 1px;
             }
 
-            .lang-btn img {
-                width: 18px;
-            }
-
-            .lang-btn .lang-code {
-                font-size: 7.5px;
-            }
-
+            .lang-btn img { width: 18px; }
+            .lang-btn .lang-code { font-size: 7.5px; }
             .links { gap: 10px; }
             .link { padding: 10px 14px; border-radius: 11px; font-size: 12px; }
             .link .icon { font-size: 16px; width: 24px; }
@@ -506,24 +512,29 @@
         </div>
 
         <nav class="links">
+            <a class="link save-contact" href="#" onclick="downloadVCard(); return false;">
+                <div class="icon"><i class="fas fa-user-plus"></i></div>
+                <span class="label" id="btn-saveContact">Save Contact</span>
+                <div class="arrow"><i class="fas fa-chevron-left"></i></div>
+            </a>
+
             <a class="link" href="https://www.behance.net/AntonMagdy" target="_blank" rel="noopener noreferrer">
                 <div class="icon"><i class="fa-brands fa-behance"></i></div>
                 <span class="label" id="btn-portfolio">Explore My Portfolio</span>
                 <div class="arrow"><i class="fas fa-chevron-left"></i></div>
             </a>
 
-            <a class="link github" href="https://github.com" target="_blank" rel="noopener noreferrer">
-                <div class="icon"><i class="fab fa-github"></i></div>
-                <span class="label" id="btn-github">Web Development Projects</span>
+            <a class="link email" href="mailto:Antonmagdy1@gmail.com">
+                <div class="icon"><i class="fas fa-envelope"></i></div>
+                <span class="label" id="btn-email">Send an Email</span>
                 <div class="arrow"><i class="fas fa-chevron-left"></i></div>
             </a>
             
-           <a class="link" href="https://ipn.eg/S/anton222/instapay/2Rmj2Z" target="_blank">
-            <div class="icon">
-              <i class="fas fa-dollar-sign"></i>
-            </div>
-            <span class="label">Pay with InstaPay</span>
-          </a>
+            <a class="link instapay" href="https://ipn.eg/S/anton222/instapay/2Rmj2Z" target="_blank">
+                <div class="icon"><i class="fas fa-dollar-sign"></i></div>
+                <span class="label" id="btn-instapay">Pay with InstaPay</span>
+                <div class="arrow"><i class="fas fa-chevron-left"></i></div>
+            </a>
             
             <a class="link linkedin" href="https://eg.linkedin.com/in/anton-magdy" target="_blank" rel="noopener noreferrer">
                 <div class="icon"><i class="fab fa-linkedin-in"></i></div>
@@ -654,13 +665,38 @@
         resize();
         loop();
 
+        // دالة إنشاء وتحميل الـ vCard لجهات الاتصال
+        function downloadVCard() {
+            const vCardData = `BEGIN:VCARD
+VERSION:3.0
+FN:Anton Magdy
+TITLE:Visual Designer & Advertising Expert
+TEL;TYPE=CELL:+201281358100
+EMAIL:Antonmagdy1@gmail.com
+URL:https://www.behance.net/AntonMagdy
+END:VCARD`;
+
+            const blob = new Blob([vCardData], { type: 'text/vcard;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'Anton_Magdy.vcf';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // تحديث كائن المحتوى ليشمل الأزرار الجديدة
         const content = {
             en: {
                 title: "Elevate Your Brand",
                 tagline: "Visual Designer & Advertising Expert",
                 desc: "Crafting high-impact brand identities, premium prints, and responsive websites that captivate and convert.",
+                saveContact: "Save Contact",
                 portfolio: "Explore My Portfolio",
-                github: "Web Development Projects",
+                email: "Send an Email",
+                instapay: "Pay with InstaPay",
                 linkedin: "Connect on LinkedIn",
                 whatsapp: "Let's Build Your Identity",
                 dir: "ltr"
@@ -669,8 +705,10 @@
                 title: "ارتقِ بهويتك التجارية",
                 tagline: "مصمم جرافيك وخبير دعاية وإعلان",
                 desc: "نبتكر هويات بصرية قوية، مطبوعات فاخرة، ومواقع إلكترونية تفاعلية تأسر الأنظار وتصنع الفارق لنشاطك.",
+                saveContact: "حفظ كجهة اتصال",
                 portfolio: "تصفح معرض أعمالي الفنية",
-                github: "مشاريع وتطوير المواقع",
+                email: "إرسال بريد إلكتروني",
+                instapay: "الدفع عبر انستاباي",
                 linkedin: "حساب الـ LinkedIn الإحترافي",
                 whatsapp: "ابدأ تصميم هويتك التجارية الآن",
                 dir: "rtl"
@@ -679,8 +717,10 @@
                 title: "Поднимите Ваш Бренд",
                 tagline: "Визуальный Дизайнер и Эксперт по Рекламе",
                 desc: "Создание впечатляющих фирменных стилей, премиальной полиграфии и адаптивных сайтов.",
+                saveContact: "Сохранить контакт",
                 portfolio: "Посмотреть Мое Портфолио",
-                github: "Проекты Веб-Разработки",
+                email: "Отправить Email",
+                instapay: "Оплатить через InstaPay",
                 linkedin: "Профиль на LinkedIn",
                 whatsapp: "Давайте Создадим Ваш Стиль",
                 dir: "ltr"
@@ -689,8 +729,10 @@
                 title: "Bringen Sie Ihre Marke Voran",
                 tagline: "Visual Designer & Werbeexperte",
                 desc: "Konzeption von starken Markenidentitäten, Premium-Drucken und responsiven Websites.",
+                saveContact: "Kontakt speichern",
                 portfolio: "Mein Portfolio Erkunden",
-                github: "Webentwicklungsprojekte",
+                email: "Eine E-Mail Senden",
+                instapay: "Mit InstaPay bezahlen",
                 linkedin: "LinkedIn Profil",
                 whatsapp: "Lassen Sie Uns Designen",
                 dir: "ltr"
@@ -699,8 +741,10 @@
                 title: "Eleva Tu Marca Al Máximo",
                 tagline: "Diseñador Visual y Experto en Publicidad",
                 desc: "Creación de identidades corporativas potentes, impresiones premium y diseño web interactivo.",
+                saveContact: "Guardar contacto",
                 portfolio: "Explorar Mi Portafolio",
-                github: "Proyectos de Desarrollo Web",
+                email: "Enviar un Correo",
+                instapay: "Pagar con InstaPay",
                 linkedin: "Conectar en LinkedIn",
                 whatsapp: "Iniciemos Tu Identidad Visual",
                 dir: "ltr"
@@ -709,8 +753,10 @@
                 title: "Valorisez Votre Image de Marque",
                 tagline: "Designer Visuel & Expert en Publicité",
                 desc: "Création d'identités de marque fortes, d'impressions de qualité supérieure et de sites web réactifs.",
+                saveContact: "Enregistrer le contact",
                 portfolio: "Découvrir Mon Portfolio",
-                github: "Projets de Développement Web",
+                email: "Envoyer un E-mail",
+                instapay: "Payer avec InstaPay",
                 linkedin: "Profil LinkedIn",
                 whatsapp: "Créons Votre Identité Visuelle",
                 dir: "ltr"
@@ -719,8 +765,10 @@
                 title: "提升您的品牌形象",
                 tagline: "视觉设计师 & 广告设计专家",
                 desc: "打造具有高影响力的品牌视觉标识、高端印刷品以及引人入胜的响应式网站设计。",
+                saveContact: "保存联系人",
                 portfolio: "浏览我的设计作品集",
-                github: "前端与网页开发项目",
+                email: "发送电子邮件",
+                instapay: "使用 InstaPay 付款",
                 linkedin: "领英专业联络",
                 whatsapp: "现在定制您的品牌形象",
                 dir: "ltr"
@@ -733,8 +781,10 @@
             document.getElementById('txt-title').innerText = data.title;
             document.getElementById('txt-tagline').innerText = data.tagline;
             document.getElementById('txt-desc').innerText = data.desc;
+            document.getElementById('btn-saveContact').innerText = data.saveContact;
             document.getElementById('btn-portfolio').innerText = data.portfolio;
-            document.getElementById('btn-github').innerText = data.github;
+            document.getElementById('btn-email').innerText = data.email;
+            document.getElementById('btn-instapay').innerText = data.instapay;
             document.getElementById('btn-linkedin').innerText = data.linkedin;
             document.getElementById('btn-whatsapp').innerText = data.whatsapp;
             
