@@ -3,13 +3,15 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Anton Magdy | Creative Designer</title>
+    <title>GoLink | Creative Studio</title>
     <link rel="icon" href="https://ik.imagekit.io/GotoLink/Me/AntonCircle2.ico" type="image/x-icon">
     
+    <!-- خطوط جوجل الاحترافية لدعم جميع اللغات بسلاسة -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
     
+    <!-- مكتبة الأيقونات FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
@@ -45,7 +47,6 @@
             position: relative;
         }
 
-        /* === 1. كانفاس نقاط Google Stitch التفاعلية === */
         #stitchCanvas {
             position: fixed;
             top: 0;
@@ -56,7 +57,6 @@
             pointer-events: auto;
         }
 
-        /* === 2. الخلفية اللانهائية وتأثير التضخيم عند الأطراف === */
         .animated-bg {
             position: fixed;
             top: 0;
@@ -103,7 +103,6 @@
             100% { transform: scale(1.35); filter: drop-shadow(0 0 8px rgba(255,255,255,0.5)); }
         }
 
-        /* نظام التوهج المزدوج المتعاكس */
         .stitch-glow-bottom-left {
             position: fixed;
             bottom: -15%;
@@ -128,7 +127,6 @@
             filter: blur(60px);
         }
 
-        /* === 3. الهيكل الزجاجي الرئيسي === */
         .wrap {
             position: relative;
             z-index: 5; 
@@ -196,7 +194,6 @@
             margin-bottom: 22px;
         }
 
-        /* === 4. محدد اللغات === */
         .lang-switch {
             display: flex;
             justify-content: center;
@@ -296,7 +293,6 @@
             box-shadow: 0 6px 15px rgba(56, 189, 248, 0.15);
         }
 
-        /* تنسيق زر Save Contact المميز */
         .link.save-contact {
             background: linear-gradient(135deg, #2563eb, var(--accent-blue));
             color: #fff;
@@ -378,9 +374,6 @@
         body.rtl .link { flex-direction: row-reverse; }
         body.ltr .link .arrow { transform: rotate(180deg); }
 
-        /* ====================================================
-           📱 استعلامات الميديا للهواتف فقط (Mobile Optimization)
-           ==================================================== */
         @media (max-width: 480px) {
             .wrap {
                 padding: 25px 18px; 
@@ -512,6 +505,7 @@
         </div>
 
         <nav class="links">
+            <!-- تغيير استدعاء الدالة ليكون async للتعامل مع الصورة -->
             <a class="link save-contact" href="#" onclick="downloadVCard(); return false;">
                 <div class="icon"><i class="fas fa-user-plus"></i></div>
                 <span class="label" id="btn-saveContact">Save Contact</span>
@@ -665,19 +659,38 @@
         resize();
         loop();
 
-        // دالة إنشاء وتحميل الـ vCard لجهات الاتصال
-        function downloadVCard() {
+        // تحديث دالة VCard لجلب الصورة ودمجها
+        async function downloadVCard() {
+            // رابط الصورة الشخصية
+            const imageUrl = 'https://ik.imagekit.io/GotoLink/Me/AntonCircle.png?auto=format&fit=crop&w=300&q=80';
+            let photoString = `PHOTO;VALUE=URI:${imageUrl}`; // الطريقة الافتراضية
+
+            try {
+                // محاولة تحويل الصورة إلى Base64 لضمان ظهورها بشكل أفضل على الهاتف
+                const response = await fetch(imageUrl);
+                const blob = await response.blob();
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                await new Promise(resolve => reader.onloadend = resolve);
+                const base64data = reader.result.split(',')[1];
+                photoString = `PHOTO;ENCODING=b;TYPE=PNG:${base64data}`;
+            } catch (error) {
+                console.log("استخدام رابط الصورة كبديل لعدم التمكن من التحويل المباشر", error);
+            }
+
+            // بناء محتوى ملف الـ vCard
             const vCardData = `BEGIN:VCARD
 VERSION:3.0
 FN:Anton Magdy
 TITLE:Visual Designer & Advertising Expert
 TEL;TYPE=CELL:+201281358100
 EMAIL:Antonmagdy1@gmail.com
-URL:https://www.behance.net/AntonMagdy
+URL:https://go-link.github.io/Me/
+${photoString}
 END:VCARD`;
 
-            const blob = new Blob([vCardData], { type: 'text/vcard;charset=utf-8' });
-            const url = window.URL.createObjectURL(blob);
+            const vCardBlob = new Blob([vCardData], { type: 'text/vcard;charset=utf-8' });
+            const url = window.URL.createObjectURL(vCardBlob);
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
@@ -687,7 +700,6 @@ END:VCARD`;
             window.URL.revokeObjectURL(url);
         }
 
-        // تحديث كائن المحتوى ليشمل الأزرار الجديدة
         const content = {
             en: {
                 title: "Elevate Your Brand",
